@@ -1,4 +1,4 @@
-from __future__ import division
+ from __future__ import division
 from aws_util import AWSEnv
 
 
@@ -52,11 +52,11 @@ def get_system_status(time_sleep,test_time_period,test_concurrent_number):
     # calcualte VMs number
     #curr_Active_VMs = OpenStack_curl_func.neutron_lb_member_list_number()
     #VMs_number = curr_Active_VMs.cnt
-    VMs_number = AWSEnv.neutron_lb_member_list_number()
+    VMs_number = env.neutron_lb_member_list_number()
 
     # calcualte workload
     # active_connections = OpenStack_curl_func.ceilometer_connections_rate()
-    active_connections = AWSEnv.ceilometer_connections_rate()
+    active_connections = env.ceilometer_connections_rate()
     workload = FQL_func.ScaleData(active_connections, 0, 100, 40)
 
     # calcualte response Time
@@ -75,6 +75,9 @@ def get_system_status(time_sleep,test_time_period,test_concurrent_number):
 def main():
 
     global epsilon
+    global as_group
+    global elb_name
+    global elb_url
     import random
     import FQL_func
     import os
@@ -85,11 +88,12 @@ def main():
 
     
     #OpenStack_curl_func.init_config_param()
+    global env
     env = AWSEnv(as_group=as_group, elb=elb_name, elb_url=elb_url)
 
 
     #Active_VMs = OpenStack_curl_func.neutron_lb_member_list_number()
-    Active_VMs = AWSEnv.neutron_lb_member_list_number()
+    Active_VMs = env.neutron_lb_member_list_number()
 
     MAX_VMs_number = 5
     MIN_VMs_number = 1
@@ -117,7 +121,7 @@ def main():
     test_time_period = 20
     time_sleep = 10
 
-    #TODO:检查是否有问题
+    
     current_state = get_system_status(time_sleep,test_time_period,test_concurrent_number)
 
 
@@ -138,7 +142,7 @@ def main():
         # calcualte VMs number
         # curr_Active_VMs = OpenStack_curl_func.neutron_lb_member_list_number()
         # VMs_number = curr_Active_VMs.cnt
-        VMs_number = AWSEnv.neutron_lb_member_list_number()
+        VMs_number = env.neutron_lb_member_list_number()
         print ' curr_Active_VMs = ' + str(VMs_number)
 
         # check to see if the chosen action could be applied in system or not
@@ -152,13 +156,13 @@ def main():
             
             if ScalingDecision == 1:
                 #OpenStack_curl_func.curl_XPOST_scale_up1()
-                AWSEnv.instance_scale_up1()
+                env.instance_scale_up1()
             elif ScalingDecision == 2:
-                AWSEnv.instance_scale_up2()
+                env.instance_scale_up2()
             elif ScalingDecision == -1:
-                AWSEnv.instance_scale_down1()
+                env.instance_scale_down1()
             elif ScalingDecision == -2:
-                AWSEnv.instance_scale_down2()
+                env.instance_scale_down2()
             
             UP_DOWN = []
             if ScalingDecision > 0:
@@ -206,7 +210,7 @@ def main():
         # exploration/exploitation strategy enforcer: after enough epoches of learning, 
         # change exploration rate and update knowledge base of the controller, 
         if epoch % 30 == 0 and canUpdate :
-            #FQL_func.update_knowledge_base(Q)
+            FQL_func.update_knowledge_base(Q)
 
             # in each learning epoch decrease epsilon until it reaches a predetermined balance 
             # between exploration and exploitation, here 0.3

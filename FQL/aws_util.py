@@ -1,17 +1,12 @@
 import boto3
 import datetime
+import math
 import numpy as np
 import os
-import math
 import pytz
-import threading
 import time
+import threading
 
-
-####################################################################
-# elb_name = 'ELB_NAME'
-# elb_url = 'ELB_URL'
-####################################################################
 
 class AWSEnv(object):
     def __init__(self, as_group, elb, elb_url):
@@ -38,29 +33,29 @@ class AWSEnv(object):
     def _scale_servers(self, num_instances):
         self.as_client.set_desired_capacity(AutoScalingGroupName=self.as_group, DesiredCapacity=num_instances, HonorCooldown=False)
     
-    def instance_scale_up1():
+    def instance_scale_up1(self):
         self._set_num_instances(1, max=5)
         self._scale_servers(self.num_instances)
 
-    def instance_scale_up2():
+    def instance_scale_up2(self):
         self._set_num_instances(2, max=5)
         self._scale_servers(self.num_instances)
 
-    def instance_scale_down1():
+    def instance_scale_down1(self):
         self._set_num_instances(-1, max=5)
         self._scale_servers(self.num_instances)
 
-    def instance_scale_down2():
+    def instance_scale_down2(self):
         self._set_num_instances(-2, max=5)
         self._scale_servers(self.num_instances)
 
-    def neutron_lb_member_list_number():
+    def neutron_lb_member_list_number(self):
         instance_ids = [x['InstanceId'] for x in self.elb_client.describe_instance_health(LoadBalancerName=self.elb_name)['InstanceStates']]
         if len(instance_ids) != self.num_instances:
             print('DEBUG: number of instances different from the instances in ASG: '+str(self.num_instances)+','+str(len(instance_ids)))
         return len(instance_ids)
 
-     def _get_max_date(self, datapoints):
+    def _get_max_date(self, datapoints):
         dates = [x['Timestamp'] for x in datapoints]
         return max(dates)
 
@@ -71,7 +66,7 @@ class AWSEnv(object):
         return {'Average':0,'Sum':0}
 
     #Get Workload
-    def ceilometer_connections_rate():
+    def ceilometer_connections_rate(self):
         end_time = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
         start_time = end_time - datetime.timedelta(minutes=10)
         request_count_sum = 0
