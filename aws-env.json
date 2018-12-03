@@ -240,10 +240,10 @@
               "pip install requests\n",
               "pip install --upgrade pip\n",
               "/usr/local/bin/pip install tensorflow\n",
-              "su -c 'git clone https://github.com/csgwon/AWS-RL-Env.git /home/ec2-user/AWS-RL-Env' ec2-user\n",
-              "sed -i 's|ELB_URL|http://",{"Fn::GetAtt": ["WebServerELB", "DNSName"]},"|g' /home/ec2-user/AWS-RL-Env/*.py\n",
-              "sed -i 's|ELB_NAME|",{"Ref": "WebServerELB"},"|g' /home/ec2-user/AWS-RL-Env/*.py\n",
-              "sed -i 's|AUTOSCALING_GROUP|",{"Ref": "WebServerASG"},"|g' /home/ec2-user/AWS-RL-Env/*.py\n"
+              "su -c 'git clone https://github.com/JanzenZhang/AWS-Q-Learning.git /home/ec2-user/AWS-Q-Learning' ec2-user\n",
+              "sed -i 's|ELB_URL|http://",{"Fn::GetAtt": ["WebServerELB", "DNSName"]},"|g' /home/ec2-user/AWS-Q-Learning/FQL/*.py\n",
+              "sed -i 's|ELB_NAME|",{"Ref": "WebServerELB"},"|g' /home/ec2-user/AWS-Q-Learning/FQL/*.py\n",
+              "sed -i 's|AUTOSCALING_GROUP|",{"Ref": "WebServerASG"},"|g' /home/ec2-user/AWS-Q-Learning/FQL/*.py\n"
             ]]}
           },
           "Tags" : [
@@ -308,9 +308,20 @@
           "UserData": {
             "Fn::Base64": { "Fn::Join":["", [
               "#!/bin/bash -ex\n",
-              "yum -y install httpd\n",
-              "echo 'Hello World' > /var/www/html/index.html\n",
-              "service httpd start"
+              "MYIP=$(ifconfig eth0|grep 'inet addr'|awk -F: '{print $2}'| awk '{print $1}')\n",
+              "echo 'name=$(hostname) cirros VM image IP=$MYIP' >> /tmp/index.html\n",
+              "echo '</html>' >> /tmp/index.html\n",
+              "while true\n",
+              "do \n",
+              "{ \n",
+                "echo 'HTTP/1.0 200 OK';\n",
+                "echo 'Content-Length: $(wc -c /tmp/index.html | cut -d' ' -f1)';\n",
+                "echo\n",
+                "cat /tmp/index.html;\n",
+              "} | sudo nc -l -p 80;\n",
+              "rnd=$(awk 'BEGIN{print $(($(hexdump -n 2 -e '/2 '%u' ' /dev/urandom)%100))/100}');\n",
+              "sleep $rnd;\n",
+              "done"
             ]]}
           }
         }
