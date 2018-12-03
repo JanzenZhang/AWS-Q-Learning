@@ -215,9 +215,8 @@ def initq():
     reward_calculator
 -----------------------------------------------------------'''     
 def reward_calculator(current_state, next_state):
-    import OpenStack_curl_func
     global DESIRED_RT, W
-    MAX_VM = OpenStack_curl_func.config_param.max_instances
+    MAX_VM = 5
         
     if next_state[1] < DESIRED_RT:
         slaFactor = 0
